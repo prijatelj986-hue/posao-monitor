@@ -8,6 +8,8 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
+from utils import matches_keywords
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                   "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",
@@ -41,6 +43,13 @@ def fetch_linkedin():
                 href = link_el.get("href", "").split("?")[0]
                 title = title_el.get_text(strip=True)
                 company = company_el.get_text(strip=True) if company_el else ""
+
+                # LinkedIn-ova sopstvena pretraga pogađa i opis posla, ne
+                # samo naslov, pa dodatno filtriramo po naslovu da ne
+                # dobijemo gomilu nepovezanih oglasa.
+                if not matches_keywords(title):
+                    continue
+
                 job_id = href.rstrip("/").split("-")[-1]
 
                 results.append({
